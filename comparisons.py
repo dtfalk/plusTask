@@ -102,15 +102,12 @@ def getLine(stimulusFilename, templates, tempArraysPath, meanDict, metric, weigh
         templatePath = os.path.join(tempArraysPath, templateFilename)
         template = np.load(templatePath) 
         templateMean = meanDict[templateFilename + metricName]
-    
-        # load stimulus mean if already calculated, otherwise calculate it
-        try:
-            stimulusMean = meanDict[stimulusFilename + metricName + str(widths[i])]
-        except KeyError:
-            stimulusMean = weightedMean(stimulus, weightsMatrices[templateFilename + metricName])
-            meanDict[stimulusFilename + metricName + str(widths[i])] = stimulusMean
+        weightMatrix = weightsMatrices[templateFilename + metricName]
 
-        result = pearsons(stimulus, template, stimulusMean, templateMean, weightsMatrices[templateFilename + metricName])
+        # calculate stimulus mean
+        stimulusMean = weightedMean(stimulus, weightMatrix)
+
+        result = pearsons(stimulus, template, stimulusMean, templateMean, weightMatrix)
         results.append(str(result))
     
     return results + [str(os.path.basename(metric)).replace('.csv', '')], metric
@@ -244,13 +241,17 @@ def pearsons(stimulus, template, stimulusMean, templateMean, weightMatrix):
 
 # runs the main portion of the code
 def runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, widths):
-
+    strrttime = local_clock()
+    print('start instance')
     # list the file names in the array and template folders
     stims = sorted(os.listdir(stimulusArraysPath), key = extractNumber)
+    print('sorted stims and templates: %f'%(local_clock() - strrttime))
+
     if 'full' in tempArraysPath or 'half' in tempArraysPath:
         templates = sorted(os.listdir(tempArraysPath), key = extractNumber)
     else:
         templates = os.listdir(tempArraysPath)
+    print('sorted stims and templates: %f'%(local_clock() - strrttime))
 
     # calculate a set of weight and distance matrices
     distanceMatrices = {}
@@ -271,6 +272,7 @@ def runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, wi
             metricName = os.path.basename(split(metric))
             weightMatrix = weightsMatrices[template + metricName]
             meanDict[template + metricName] = weightedMean(file, weightMatrix)
+    print('means distances and weights calculated: %f'%(local_clock() - strrttime))
 
 
     # write the headers for each file
@@ -298,25 +300,62 @@ def runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, wi
                 write.writerow(header)
             else:
                 write.writerow(['stimulusNumber', 'S r', 'metric'])
+    print('headers written: %f'%(local_clock() - strrttime))
 
 
     #  collect all of the tasks for future parallel execution
+    taskCounter = 0
+    taskTimer = local_clock()
     tasks = []
-    for metric in metricList:
-
+    i = 0
+    for stimulusFilename in stims:
+        stimulusNum = os.path.basename(stimulusFilename)
+        stimulusNumber = int(stimulusNum.replace('.npy', ''))
+        if i % 10000 == 0:
+            print(i)
+            print('runtime for %d stimuli: %f'%(i, local_clock()- strrttime))
+        i += 1
+        
         metricName = os.path.basename(split(metric))
 
         # for each array, perform the analysis on all of the templates
-        for stimulusFilename in stims:
+        for metric in metricList:
+
+            # delete all of this
+            # ----------------------------------
+            # ----------------------------------
+            # if not 'linear' in metric:
+            #     if stimulusNumber <= 998433:
+            #         continue
+            # else:
+            #     if stimulusNumber <= 998434:
+            #         continue
+            # ----------------------------------
+            # ----------------------------------
+
+            metricName = os.path.basename(split(metric))
 
             # load the stimulus
             stimulusPath = os.path.join(stimulusArraysPath, stimulusFilename)
             stimulus = np.load(stimulusPath)
-    
-            tasks.append([stimulusFilename, templates, tempArraysPath, meanDict, metric, weightsMatrices, metricName, widths, stimulus, distanceType])
 
-    # execute tasks in parallel
+            tasks.append([stimulusFilename, templates, tempArraysPath, meanDict, metric, weightsMatrices, metricName, widths, stimulus, distanceType])
+            if len(tasks) >= 10000:
+                print('execute')
+                executeTasks(tasks)
+                tasks = []
+                taskCounter += 10000
+                print('%d tasks completed in %f seconds: '%(taskCounter, local_clock() - taskTimer))
+
+    #executeTasks(tasks) # delete meeeeeeeee
+    print('tasks collected: %f'%(local_clock() - strrttime))
+
+# executes tasks in parallel
+def executeTasks(tasks):
+
+    i = 0
     with concurrent.futures.ProcessPoolExecutor() as executor:
+        time = local_clock()
         future_to_task = {executor.submit(getLine, *task): task for task in tasks}
 
         for future in concurrent.futures.as_completed(future_to_task):
@@ -339,7 +378,9 @@ def runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, wi
                 # setup a writer/header and write the header
                 write = writer(f)
                 write.writerow(results)        
-
+            i += 1
+            if i % 1000 == 0:
+                print('%d runtime: %f'%(i, local_clock() - time))
 
 
 if __name__ == '__main__':
@@ -356,7 +397,14 @@ if __name__ == '__main__':
 
     for tempArraysPath in templateList:
         for distanceType in distanceTypes:
+            # if distanceType == 'fullStimulus' and \
+            #     not ('full' in tempArraysPath):
+            #     print(tempArraysPath)
+            #     print(distanceType)
+            #     continue
+            iterationStart = local_clock()
             runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, widths)
+            print('Iteration Runtime: %f'%(local_clock() - iterationStart))
     
     # print the runtime
     print('runtime: %f'%(local_clock() - startTime))  
