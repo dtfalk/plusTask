@@ -90,8 +90,8 @@ def compose(n, metric, templateType, distanceType, templateNumber):
     compositeImageBottomN = Image.fromarray(compositeArrayBottomN.astype(np.uint8), 'L')
     compositeImageBottomN.save(compositeImageSavePathBottomN)
     compositeImageBottomN.close()
+            
 
-    
 if __name__ == '__main__':
     startTime = local_clock()
     metrics = ['central', 'gaussian', 'linear', 'logarithmic', 'quadratic', 'unweighted']
