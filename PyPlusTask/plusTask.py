@@ -13,7 +13,7 @@ def experiment(gametype, dataSavePath, outlet, win, subjectName, subjectNumber):
     
     # path for images folder and image extension label
     curDir = os.path.dirname(__file__)
-    imagesDir = os.path.join(curDir, 'stimuli', 'images')
+    imagesDir = os.path.join(curDir, '..', 'stimuli', 'images')
     extension = '.png'
 
     # various variables for handling the game

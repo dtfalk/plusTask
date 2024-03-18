@@ -56,21 +56,21 @@ def getPaths():
     curDir = os.path.dirname(__file__)
     
     # where to find stimulus arrays
-    stimulusArraysPath = os.path.join(curDir, 'stimuli', 'arrays')
+    stimulusArraysPath = os.path.join(curDir, '..', 'stimuli', 'arrays')
     
     # where to find template arrays
-    templateArraysPathFull = os.path.join(curDir, 'templates', 'full', 'arrays')
-    templateArraysPathHalf = os.path.join(curDir, 'templates', 'half','arrays')
-    templateArraysSPath = os.path.join(curDir, 'templates', 'S', 'arrays')
+    templateArraysPathFull = os.path.join(curDir, '..', 'templates', 'full', 'arrays')
+    templateArraysPathHalf = os.path.join(curDir, '..', 'templates', 'half','arrays')
+    templateArraysSPath = os.path.join(curDir, '..', 'templates', 'S', 'arrays')
 
     # paths for storing results
-    resultsPath = os.path.join(curDir, 'statisticalResults')
-    linearPath = os.path.join(resultsPath, 'linear')
-    quadraticPath = os.path.join(resultsPath, 'quadratic')
-    centralPath = os.path.join(resultsPath, 'central')
-    logPath = os.path.join(resultsPath, 'logarithmic')
-    gaussianPath = os.path.join(resultsPath, 'gaussian')
-    unweightedPath = os.path.join(resultsPath, 'unweighted')
+    resultsPath = os.path.join(curDir, '..', 'statisticalResults')
+    linearPath = os.path.join(resultsPath, '..', 'linear')
+    quadraticPath = os.path.join(resultsPath, '..', 'quadratic')
+    centralPath = os.path.join(resultsPath, '..', 'central')
+    logPath = os.path.join(resultsPath, '..', 'logarithmic')
+    gaussianPath = os.path.join(resultsPath, '..', 'gaussian')
+    unweightedPath = os.path.join(resultsPath, '..', 'unweighted')
     
     # store csv names as a list
     resultPathsList = [linearPath, quadraticPath, centralPath, \

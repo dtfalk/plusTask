@@ -12,11 +12,11 @@ def compose(n, metric, templateType, distanceType, templateNumber):
     topNStimuliNumbers = []
     bottomNStimuliNumbers = []
     if templateType == 'full' or templateType == 'half':
-        topNLoadPath = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Top', 'Top%d.csv'%n)
-        bottomNLoadPath = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Bottom', 'Bottom%d.csv'%n)
+        topNLoadPath = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Top', 'Top%d.csv'%n)
+        bottomNLoadPath = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Bottom', 'Bottom%d.csv'%n)
     else:
-        topNLoadPath = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Top', 'Top%d.csv'%n)
-        bottomNLoadPath = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Bottom', 'Bottom%d.csv'%n)
+        topNLoadPath = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Top', 'Top%d.csv'%n)
+        bottomNLoadPath = os.path.join(curDir,'..', 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Bottom', 'Bottom%d.csv'%n)
 
     with open(topNLoadPath, 'r', newline = '') as f:
         reader = csv.reader(f)
@@ -37,13 +37,13 @@ def compose(n, metric, templateType, distanceType, templateNumber):
     # load the relevant arrays into a list
     topNStimuli = []
     for stimulusNumber in topNStimuliNumbers:
-        loadPath = os.path.join(curDir, 'stimuli', 'arrays', '%s.npy'%stimulusNumber)
+        loadPath = os.path.join(curDir, '..', 'stimuli', 'arrays', '%s.npy'%stimulusNumber)
         stimuliArray = np.load(loadPath)
         topNStimuli.append(stimuliArray.copy()) 
     
     bottomNStimuli = []
     for stimulusNumber in bottomNStimuliNumbers:
-        loadPath = os.path.join(curDir, 'stimuli', 'arrays', '%s.npy'%stimulusNumber)
+        loadPath = os.path.join(curDir, '..', 'stimuli', 'arrays', '%s.npy'%stimulusNumber)
         stimuliArray = np.load(loadPath)
         bottomNStimuli.append(stimuliArray.copy()) 
         
@@ -62,11 +62,11 @@ def compose(n, metric, templateType, distanceType, templateNumber):
     
     # save composite arrays to relevant folders
     if templateType == 'full' or templateType == 'half':
-        compositeArraySavePathTopN = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'arrays', templateNumber, 'Top', 'Composite%d.npy'%n)
-        compositeArraySavePathBottomN = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'arrays', templateNumber, 'Bottom', 'Composite%d.npy'%n)
+        compositeArraySavePathTopN = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'arrays', templateNumber, 'Top', 'Composite%d.npy'%n)
+        compositeArraySavePathBottomN = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'arrays', templateNumber, 'Bottom', 'Composite%d.npy'%n)
     else:
-        compositeArraySavePathTopN = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'arrays', 'Top', 'Composite%d.npy'%n)
-        compositeArraySavePathBottomN = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'arrays', 'Bottom', 'Composite%d.npy'%n)
+        compositeArraySavePathTopN = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'arrays', 'Top', 'Composite%d.npy'%n)
+        compositeArraySavePathBottomN = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'arrays', 'Bottom', 'Composite%d.npy'%n)
     os.makedirs(os.path.dirname(compositeArraySavePathBottomN), exist_ok = True)    
     os.makedirs(os.path.dirname(compositeArraySavePathTopN), exist_ok = True)
 
@@ -75,11 +75,11 @@ def compose(n, metric, templateType, distanceType, templateNumber):
 
     # save composite images to relevant folders
     if templateType == 'full' or templateType == 'half':
-        compositeImageSavePathTopN = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'images', templateNumber, 'Top', 'Composite%d.png'%n)
-        compositeImageSavePathBottomN = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'images', templateNumber, 'Bottom', 'Composite%d.png'%n)
+        compositeImageSavePathTopN = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'images', templateNumber, 'Top', 'Composite%d.png'%n)
+        compositeImageSavePathBottomN = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'images', templateNumber, 'Bottom', 'Composite%d.png'%n)
     else:
-        compositeImageSavePathTopN = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'images', 'Top', 'Composite%d.png'%n)
-        compositeImageSavePathBottomN = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'images', 'Bottom', 'Composite%d.png'%n)
+        compositeImageSavePathTopN = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'images', 'Top', 'Composite%d.png'%n)
+        compositeImageSavePathBottomN = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'images', 'Bottom', 'Composite%d.png'%n)
     os.makedirs(os.path.dirname(compositeImageSavePathTopN), exist_ok = True)
     os.makedirs(os.path.dirname(compositeImageSavePathBottomN), exist_ok = True)
 

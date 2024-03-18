@@ -13,7 +13,7 @@ def createFolders():
     templateNumbers = ['2', '4', '6', '8', '10', '12', '14', '16', '18', '20']
 
     curDir = os.path.dirname(__file__)
-    savePath = os.path.join(curDir, 'topStimuli')
+    savePath = os.path.join(curDir, '..', 'topStimuli')
 
     for metric in metrics:
         for templateType in templateTypes:
@@ -45,7 +45,7 @@ def saveDataFrame(df, path, first_col_name, filtered_col_name):
 def findTopNStimuli(n, metric, templateType, distanceType, templateNumber):
 
     curDir = os.path.dirname(__file__)
-    csvPath = os.path.join(curDir, 'statisticalResults', metric, templateType, '%s.csv'%distanceType)
+    csvPath = os.path.join(curDir, '..', 'statisticalResults', metric, templateType, '%s.csv'%distanceType)
 
     # Load the CSV into a DataFrame
     df = pd.read_csv(csvPath)
@@ -77,11 +77,11 @@ def findTopNStimuli(n, metric, templateType, distanceType, templateNumber):
     bottomTen = bottomHundred.tail(10)
 
     if templateType == 'full' or templateType == 'half':
-        saveFolderTop = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType,  'CSVs', templateNumber, 'Top')
-        saveFolderBottom = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType,  'CSVs', templateNumber, 'Bottom')
+        saveFolderTop = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType,  'CSVs', templateNumber, 'Top')
+        saveFolderBottom = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType,  'CSVs', templateNumber, 'Bottom')
     else: 
-        saveFolderTop = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType,  'CSVs', 'Top')
-        saveFolderBottom = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType,  'CSVs', 'Bottom')
+        saveFolderTop = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType,  'CSVs', 'Top')
+        saveFolderBottom = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType,  'CSVs', 'Bottom')
     os.makedirs(saveFolderTop, exist_ok = True)
     os.makedirs(saveFolderBottom, exist_ok = True)
 

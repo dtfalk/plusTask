@@ -8,16 +8,16 @@ def statistics(n, metric, templateType, distanceType, templateNumber):
     curDir = os.path.dirname(__file__)
 
     if templateType == 'full' or templateType == 'half':
-        loadPathBottom = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Bottom', 'Bottom%d.csv'%n)
-        loadPathTop = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Top', 'Top%d.csv'%n)
-        savePathBottom = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Bottom', 'Bottom%dStats.csv'%n)
-        savePathTop = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Top', 'Top%dStats.csv'%n)
+        loadPathBottom = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Bottom', 'Bottom%d.csv'%n)
+        loadPathTop = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Top', 'Top%d.csv'%n)
+        savePathBottom = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Bottom', 'Bottom%dStats.csv'%n)
+        savePathTop = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Top', 'Top%dStats.csv'%n)
         columnName = '%s r'%templateNumber
     else:
-        loadPathBottom = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Bottom', 'Bottom%d.csv'%n)
-        loadPathTop = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Top', 'Top%d.csv'%n)
-        savePathBottom = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Bottom', 'Bottom%dStats.csv'%n)
-        savePathTop = os.path.join(curDir, 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Top', 'Top%dStats.csv'%n)
+        loadPathBottom = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Bottom', 'Bottom%d.csv'%n)
+        loadPathTop = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Top', 'Top%d.csv'%n)
+        savePathBottom = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Bottom', 'Bottom%dStats.csv'%n)
+        savePathTop = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Top', 'Top%dStats.csv'%n)
         columnName = 'S r'
 
     dfBottom = pd.read_csv(loadPathBottom)

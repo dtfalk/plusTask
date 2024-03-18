@@ -21,19 +21,19 @@ def createSavePaths():
     curDir = os.path.dirname(__file__)
 
     # paths to the various template folders
-    templateImagePathFull = os.path.join(curDir, 'templates', 'full', 'images')
-    templateArrayPathFull = os.path.join(curDir, 'templates', 'full', 'arrays')
-    templateImagePathHalf = os.path.join(curDir, 'templates', 'half', 'images')
-    templateArrayPathHalf = os.path.join(curDir, 'templates', 'half','arrays')
-    templateImagePathS = os.path.join(curDir, 'templates', 'S', 'images')
-    templateArrayPathS = os.path.join(curDir, 'templates', 'S', 'arrays')
+    templateImagePathFull = os.path.join(curDir, '..', 'templates', 'full', 'images')
+    templateArrayPathFull = os.path.join(curDir, '..', 'templates', 'full', 'arrays')
+    templateImagePathHalf = os.path.join(curDir, '..', 'templates', 'half', 'images')
+    templateArrayPathHalf = os.path.join(curDir, '..', 'templates', 'half','arrays')
+    templateImagePathS = os.path.join(curDir, '..', 'templates', 'S', 'images')
+    templateArrayPathS = os.path.join(curDir, '..', 'templates', 'S', 'arrays')
     templatePaths = [templateImagePathFull, templateArrayPathFull, 
                      templateImagePathHalf, templateArrayPathHalf,
                      templateImagePathS, templateArrayPathS]
 
     # paths to the stimuli folders
-    stimulusImagePath = os.path.join(curDir, 'stimuli', 'images')
-    stimulusArrayPath = os.path.join(curDir, 'stimuli', 'arrays')
+    stimulusImagePath = os.path.join(curDir, '..', 'stimuli', 'images')
+    stimulusArrayPath = os.path.join(curDir, '..', 'stimuli', 'arrays')
     stimulusPaths = [stimulusImagePath, stimulusArrayPath]
 
     # create the directory for each of the stimlus/template paths defined above
