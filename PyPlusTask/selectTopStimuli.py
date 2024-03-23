@@ -4,11 +4,15 @@ import numpy
 import pandas as pd
 from pylsl import local_clock
 
+nonPlusTemplates = ['S', 'H', 'I', 'LeftFeature', 'RightFeature', 'TopFeature',
+                     'BottomFeature', 'HorizontalMiddleFeature', 'VerticalMiddleFeature']
+
 # creates all of the necessary folders
 def createFolders():
 
     metrics = ['central', 'gaussian', 'linear', 'logarithmic', 'quadratic', 'unweighted']
-    templateTypes = ['full', 'half', 'S']
+    templateTypes = ['full', 'half', 'S', 'H', 'I', 'LeftFeature', 'RightFeature', 'TopFeature',
+                     'BottomFeature', 'HorizontalMiddleFeature', 'VerticalMiddleFeature']
     distanceTypes = ['fullStimulus', 'borders']
     templateNumbers = ['2', '4', '6', '8', '10', '12', '14', '16', '18', '20']
 
@@ -23,7 +27,7 @@ def createFolders():
                 arraysPath = os.path.join(folderPath, 'arrays')
                 CSVsPath = os.path.join(folderPath, 'CSVs')
             
-                if templateType == 'S':
+                if templateType in nonPlusTemplates:
                     os.makedirs(imagesPath, exist_ok = True)
                     os.makedirs(arraysPath, exist_ok = True)
                     os.makedirs(CSVsPath, exist_ok = True)
@@ -51,16 +55,19 @@ def findTopNStimuli(n, metric, templateType, distanceType, templateNumber):
     df = pd.read_csv(csvPath)
 
     # Sort the DataFrame by your column of interest in descending order
-    if templateType == 'full' or templateType == 'half':
+    if not templateType in nonPlusTemplates:
         dfSorted = df.sort_values(by='%s r'%templateNumber, ascending=False)
     else:
-        dfSorted = df.sort_values(by='S r', ascending=False)
+        dfSorted = df.sort_values(by='%s r'%templateType, ascending=False)
     
     # Create a copy of dfSorted to sort by absolute values
     dfSortedAbs = dfSorted.copy()
 
     # Determine the column to sort by
-    sort_column = '%s r' % templateNumber if templateType in ['full', 'half'] else 'S r'
+    if not templateType in nonPlusTemplates:
+        sort_column = '%s r' %templateNumber 
+    else:
+        sort_column = '%s r' %templateType
 
     # Calculate the absolute values for the column of interest in the copied DataFrame
     dfSortedAbs[sort_column] = dfSortedAbs[sort_column].abs()
@@ -76,7 +83,7 @@ def findTopNStimuli(n, metric, templateType, distanceType, templateNumber):
     bottomHundred = bottomThousand.tail(100)
     bottomTen = bottomHundred.tail(10)
 
-    if templateType == 'full' or templateType == 'half':
+    if not templateType in nonPlusTemplates:
         saveFolderTop = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType,  'CSVs', templateNumber, 'Top')
         saveFolderBottom = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType,  'CSVs', templateNumber, 'Bottom')
     else: 
@@ -91,7 +98,7 @@ def findTopNStimuli(n, metric, templateType, distanceType, templateNumber):
     bottomThousandSave = os.path.join(saveFolderBottom, 'Bottom1000.csv')
     bottomHundredSave = os.path.join(saveFolderBottom, 'Bottom100.csv')
     bottomTenSave = os.path.join(saveFolderBottom, 'Bottom10.csv')
-    if templateType == 'full' or templateType == 'half':
+    if not templateType in nonPlusTemplates:
         saveDataFrame(topThousand, topThousandSave, 'stimulusNumber', '%s r'%templateNumber)
         saveDataFrame(topHundred, topHundredSave, 'stimulusNumber', '%s r'%templateNumber)
         saveDataFrame(topTen, topTenSave, 'stimulusNumber', '%s r'%templateNumber)
@@ -99,29 +106,34 @@ def findTopNStimuli(n, metric, templateType, distanceType, templateNumber):
         saveDataFrame(bottomHundred, bottomHundredSave, 'stimulusNumber', '%s r'%templateNumber)
         saveDataFrame(bottomTen, bottomTenSave, 'stimulusNumber', '%s r'%templateNumber)
     else: 
-        saveDataFrame(topThousand, topThousandSave, 'stimulusNumber', 'S r')
-        saveDataFrame(topHundred, topHundredSave, 'stimulusNumber', 'S r')
-        saveDataFrame(topTen, topTenSave, 'stimulusNumber', 'S r')
-        saveDataFrame(bottomThousand, bottomThousandSave, 'stimulusNumber', 'S r')
-        saveDataFrame(bottomHundred, bottomHundredSave, 'stimulusNumber', 'S r')
-        saveDataFrame(bottomTen, bottomTenSave, 'stimulusNumber', 'S r')
+        saveDataFrame(topThousand, topThousandSave, 'stimulusNumber', '%s r'%templateType)
+        saveDataFrame(topHundred, topHundredSave, 'stimulusNumber', '%s r'%templateType)
+        saveDataFrame(topTen, topTenSave, 'stimulusNumber', '%s r'%templateType)
+        saveDataFrame(bottomThousand, bottomThousandSave, 'stimulusNumber', '%s r'%templateType)
+        saveDataFrame(bottomHundred, bottomHundredSave, 'stimulusNumber', '%s r'%templateType)
+        saveDataFrame(bottomTen, bottomTenSave, 'stimulusNumber', '%s r'%templateType)
     return
 
 
 if __name__ == '__main__':
     startTime = local_clock()
     metrics = ['central', 'gaussian', 'linear', 'logarithmic', 'quadratic', 'unweighted']
-    templateTypes = ['full', 'half', 'S']
+    templateTypes = ['full', 'half', 'S', 'H', 'I', 'LeftFeature', 'RightFeature', 'TopFeature',
+                     'BottomFeature', 'HorizontalMiddleFeature', 'VerticalMiddleFeature']
     distanceTypes = ['fullStimulus', 'borders']
     templateNumbers = ['2', '4', '6', '8', '10', '12', '14', '16', '18', '20']
+    templateNumber = 0
 
     createFolders()
 
     for metric in metrics:
         for templateType in templateTypes:
             for distanceType in distanceTypes:
-                for templateNumber in templateNumbers:
+                if templateType in nonPlusTemplates:
                     findTopNStimuli(1000, metric, templateType, distanceType, templateNumber)
+                else:
+                    for templateNumber in templateNumbers:
+                        findTopNStimuli(1000, metric, templateType, distanceType, templateNumber)
     
     print('runtime: %f'%(local_clock() - startTime))
 

@@ -5,6 +5,8 @@ import concurrent.futures
 import os
 from pylsl import local_clock
 
+currentDirectory = os.path.dirname(__file__)
+savePath = os.path.join(currentDirectory, 'results.csv')
 # Defining some global variables
 # ===============================================================================
 # ===============================================================================
@@ -18,12 +20,12 @@ sigma = 1 # constant for gaussian measure
 imageCenter = imageWidth // 2 # assumes a square image
 
 # true widths are doubled plus one
-widths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+#widths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 # template names for csv file
-templateNames = ['2 r', '4 r', '6 r', '8 r', '10 r', \
-                '12 r', '14 r', '16 r', '18 r', '20 r']
-header = ['stimulusNumber'] + templateNames + ['metric']
+#templateNames = ['2 r', '4 r', '6 r', '8 r', '10 r', \
+#                '12 r', '14 r', '16 r', '18 r', '20 r']
+#header = ['stimulusNumber'] + templateNames + ['metric']
 
 # ===============================================================================
 # ===============================================================================
@@ -59,45 +61,42 @@ def getPaths():
     stimulusArraysPath = os.path.join(curDir, '..', 'stimuli', 'arrays')
     
     # where to find template arrays
-    templateArraysPathFull = os.path.join(curDir, '..', 'templates', 'full', 'arrays')
-    templateArraysPathHalf = os.path.join(curDir, '..', 'templates', 'half','arrays')
-    templateArraysSPath = os.path.join(curDir, '..', 'templates', 'S', 'arrays')
+    templateArraysPathH = os.path.join(curDir, '..', 'templates', 'H', 'arrays')
+    templateArraysPathI = os.path.join(curDir, '..', 'templates', 'I','arrays')
 
     # paths for storing results
-    resultsPath = os.path.abspath(os.path.join(curDir, '..', 'statisticalResults'))
-    #linearPath = os.path.join(resultsPath, '..', 'linear')
-    # quadraticPath = os.path.join(resultsPath, '..', 'quadratic')
+    resultsPath = os.path.join(curDir, '..', 'statisticalResults')
+    linearPath = os.path.abspath(os.path.join(resultsPath, 'linear'))
+    quadraticPath = os.path.abspath(os.path.join(resultsPath, 'quadratic'))
     centralPath = os.path.abspath(os.path.join(resultsPath, 'central'))
-    # logPath = os.path.join(resultsPath, '..', 'logarithmic')
-    # gaussianPath = os.path.join(resultsPath, '..', 'gaussian')
+    logPath = os.path.abspath(os.path.join(resultsPath, 'logarithmic'))
+    gaussianPath = os.path.abspath(os.path.join(resultsPath, 'gaussian'))
     unweightedPath = os.path.abspath(os.path.join(resultsPath, 'unweighted'))
+    #print('\n\n\nunweighted path: %s\n\n\n'%os.path.abspath(unweightedPath))
     
     # store csv names as a list
-    #resultPathsList = [linearPath, quadraticPath, centralPath, \
-           #logPath, unweightedPath, gaussianPath]
-    
-    resultPathsList = [centralPath, unweightedPath]
+    resultPathsList = [linearPath, quadraticPath, centralPath, \
+           logPath, unweightedPath, gaussianPath]
     
     # create folders for each of the statistical weighting conditions
     for path in resultPathsList:
-        if not os.path.exists(path):
-
-            # directory of the subfolder paths (half and full)
-            subDirectories = [os.path.join(path, 'half'), os.path.join(path, 'full'), os.path.join(path, 'S')]
+            # directory of the subfolder paths (H and I)
+            subDirectories = [os.path.join(path, 'H'), os.path.join(path, 'I')]
 
             # make the overall directory (statistical measure name) and subdirectories
             os.makedirs(path, exist_ok = True) 
             for subPath in subDirectories:
-                os.makedirs(subPath, exist_ok = True)
+                os.makedirs(subPath, exist_ok = True) 
             
-    return stimulusArraysPath, templateArraysPathFull, templateArraysPathHalf, templateArraysSPath, resultPathsList
+    return stimulusArraysPath, templateArraysPathH, templateArraysPathI, resultPathsList
 
 # get one line of results for a given stimulus and metric over all of the templates
-def getLine(stimulusFilename, templates, tempArraysPath, meanDict, metric, weightsMatrices, metricName, widths, stimulus, distanceType):
+def getLine(stimulusFilename, templates, tempArraysPath, meanDict, metric, weightsMatrices, metricName, stimulus, distanceType):
 
     # prep the results list
     results = [split(stimulusFilename)]
 
+    #print(templates)
     for i, templateFilename in enumerate(templates):
     
         # load the template and its mean
@@ -112,7 +111,7 @@ def getLine(stimulusFilename, templates, tempArraysPath, meanDict, metric, weigh
         result = pearsons(stimulus, template, stimulusMean, templateMean, weightMatrix)
         results.append(str(result))
     
-    return results + [str(os.path.basename(metric)).replace('.csv', '')], metric
+    return results + [str(os.path.basename(metric)).replace('.csv', ''), str(templates[0]), str(distanceType)]
 
 # ===============================================================================
 # ===============================================================================
@@ -243,22 +242,20 @@ def pearsons(stimulus, template, stimulusMean, templateMean, weightMatrix):
 
 
 # runs the main portion of the code
-def runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, widths):
+def runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList):
     strrttime = local_clock()
     print('start instance')
     # list the file names in the array and template folders
     stims = sorted(os.listdir(stimulusArraysPath), key = extractNumber)
     print('sorted stims and templates: %f'%(local_clock() - strrttime))
 
-    if 'full' in tempArraysPath or 'half' in tempArraysPath:
-        templates = sorted(os.listdir(tempArraysPath), key = extractNumber)
-    else:
-        templates = os.listdir(tempArraysPath)
+    templates = os.listdir(tempArraysPath)
     print('sorted stims and templates: %f'%(local_clock() - strrttime))
 
     # calculate a set of weight and distance matrices
     distanceMatrices = {}
     weightsMatrices = {}
+    #print(len('\n\nLENGTH OF TEMPLATES: %s\n\n'%templates))
     for i, template in enumerate(templates):
         distanceMatrices[template] = distances(template, tempArraysPath, distanceType)
     for matrixName, distanceMatrix in distanceMatrices.items():
@@ -282,27 +279,26 @@ def runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, wi
     for metric in metricList:
 
         # different save paths for different stimulus types (half crosses vs full crosses)
-        if 'full' in tempArraysPath:
-            savePath = os.path.join(metric, 'full')
-        elif 'half' in tempArraysPath: 
-            savePath = os.path.join(metric, 'half')
-        else:
-            savePath = os.path.join(metric, 'S')
+        if 'H' in os.path.basename(os.path.dirname(tempArraysPath)):
+            savePathfinal = os.path.join(metric, 'H')
+        elif 'I' in os.path.basename(os.path.dirname(tempArraysPath)):
+            savePathfinal = os.path.join(metric, 'I')
         
         if distanceType == 'borders': # different csv files for different distance types
-            savePath = os.path.join(savePath, 'borders.csv')
+            savePathfinal = os.path.join(savePathfinal, 'borders.csv')
         else:
-            savePath = os.path.join(savePath, 'fullStimulus.csv')
+            savePathfinal = os.path.join(savePathfinal, 'fullStimulus.csv')
+        
 
         # open the metric-specific csv file for writing
-        with open(savePath, 'w', newline = '') as f:
+        with open(savePathfinal, 'w', newline = '') as f:
         
             # setup a writer/header and write the header
             write = writer(f)
-            if 'full' in tempArraysPath or 'half' in tempArraysPath:
-                write.writerow(header)
-            else:
-                write.writerow(['stimulusNumber', 'S r', 'metric'])
+            if 'H' in os.path.basename(os.path.dirname(tempArraysPath)):
+                write.writerow(['stimulusNumber', 'H r', 'metric', 'stimilusType', 'distanceType'])
+            elif 'I' in os.path.basename(os.path.dirname(tempArraysPath)):
+                write.writerow(['stimulusNumber', 'I r', 'metric', 'stimilusType','distanceType'])
     print('headers written: %f'%(local_clock() - strrttime))
 
 
@@ -314,12 +310,12 @@ def runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, wi
     for stimulusFilename in stims:
         stimulusNum = os.path.basename(stimulusFilename)
         stimulusNumber = int(stimulusNum.replace('.npy', ''))
-        if i % 10000 == 0:
+        if i % 100000 == 0:
             print(i)
             print('runtime for %d stimuli: %f'%(i, local_clock()- strrttime))
         i += 1
         
-        metricName = os.path.basename(split(metric))
+        #metricName = os.path.basename(split(metric))
 
         # for each array, perform the analysis on all of the templates
         for metric in metricList:
@@ -330,48 +326,44 @@ def runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, wi
             stimulusPath = os.path.join(stimulusArraysPath, stimulusFilename)
             stimulus = np.load(stimulusPath)
 
-            tasks.append([stimulusFilename, templates, tempArraysPath, meanDict, metric, weightsMatrices, metricName, widths, stimulus, distanceType])
+            tasks.append([stimulusFilename, templates, tempArraysPath, meanDict, metric, weightsMatrices, metricName,  stimulus, distanceType])
             if len(tasks) >= 10000:
-                print('execute')
                 executeTasks(tasks)
                 tasks = []
-                taskCounter += 10000
+                taskCounter += 1000
                 print('%d tasks completed in %f seconds: '%(taskCounter, local_clock() - taskTimer))
 
     #executeTasks(tasks) # delete meeeeeeeee
-    print('tasks collected: %f'%(local_clock() - strrttime))
+    #print('tasks collected: %f'%(local_clock() - strrttime))
+                
+def chunked(iterable, chunk_size):
+    """Yield successive chunk_size chunks from iterable."""
+    for i in range(0, len(iterable), chunk_size):
+        yield iterable[i:i + chunk_size]
 
 # executes tasks in parallel
 def executeTasks(tasks):
-
     i = 0
     with concurrent.futures.ProcessPoolExecutor() as executor:
         time = local_clock()
-        future_to_task = {executor.submit(getLine, *task): task for task in tasks}
 
-        for future in concurrent.futures.as_completed(future_to_task):
-            results, metric = future.result()
-            stimulusFilename, templates, tempArraysPath, meanDict, metric, weightsMatrices, metricName, widths, stimulus, distanceType = future_to_task[future]
+        for chunk in chunked(tasks, 1000):
+            batchedResults = []
+            futures = [executor.submit(getLine, *task) for task in chunk]
 
-            # different save paths for different stimulus types (half crosses vs full crosses)
-            if 'full' in tempArraysPath:
-                savePath = os.path.join(metric, 'full')
-            elif 'half' in tempArraysPath: 
-                savePath = os.path.join(metric, 'half')
-            else:
-                savePath = os.path.join(metric, 'S')
-        
-            if distanceType == 'borders': # different csv files for different distance types
-                savePath = os.path.join(savePath, 'borders.csv')
-            else:
-                savePath = os.path.join(savePath, 'fullStimulus.csv')
+            for future in concurrent.futures.as_completed(futures):
+                batchedResults.append((future.result()))
+                #_, _, tempArraysPath, _, metric, _, _, _, distanceType = futures[future]
+                
             with open(savePath, 'a', newline = '') as f:
-                # setup a writer/header and write the header
+            # setup a writer/header and write the header
                 write = writer(f)
-                write.writerow(results)        
-            i += 1
-            if i % 1000 == 0:
-                print('%d runtime: %f'%(i, local_clock() - time))
+                for result in batchedResults:
+                    write.writerow(result)
+                  
+                #i += 1
+            #if i % 10000 == 0:
+                #print('%d runtime: %f'%(i, local_clock() - time))
 
 
 if __name__ == '__main__':
@@ -380,21 +372,16 @@ if __name__ == '__main__':
     startTime = local_clock()
    
     # various save and load paths
-    stimulusArraysPath, templateArraysPathFull, templateArraysPathHalf, templateArraysSPath, metricList = getPaths()
+    stimulusArraysPath, templateArraysPathH, templateArraysPathI, metricList = getPaths()
     
     # list and for loop to let me iterate over the stimuli n times for each of n types of templates
     # because I am lazy and dont want to refactor the code
-    templateList = [templateArraysPathFull, templateArraysPathHalf, templateArraysSPath]
+    templateList = [templateArraysPathH, templateArraysPathI]
 
     for tempArraysPath in templateList:
         for distanceType in distanceTypes:
-            # if distanceType == 'fullStimulus' and \
-            #     not ('full' in tempArraysPath):
-            #     print(tempArraysPath)
-            #     print(distanceType)
-            #     continue
             iterationStart = local_clock()
-            runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, widths)
+            runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList)
             print('Iteration Runtime: %f'%(local_clock() - iterationStart))
     
     # print the runtime

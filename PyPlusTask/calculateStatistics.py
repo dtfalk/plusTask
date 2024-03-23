@@ -3,11 +3,13 @@ import os
 import pandas as pd
 from pylsl import local_clock
 
+nonPlusTemplates = ['S', 'H', 'I', 'LeftFeature', 'RightFeature', 'TopFeature',
+                     'BottomFeature', 'HorizontalMiddleFeature', 'VerticalMiddleFeature']
 
 def statistics(n, metric, templateType, distanceType, templateNumber):
     curDir = os.path.dirname(__file__)
 
-    if templateType == 'full' or templateType == 'half':
+    if not templateType in nonPlusTemplates:
         loadPathBottom = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Bottom', 'Bottom%d.csv'%n)
         loadPathTop = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Top', 'Top%d.csv'%n)
         savePathBottom = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Bottom', 'Bottom%dStats.csv'%n)
@@ -18,7 +20,7 @@ def statistics(n, metric, templateType, distanceType, templateNumber):
         loadPathTop = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Top', 'Top%d.csv'%n)
         savePathBottom = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Bottom', 'Bottom%dStats.csv'%n)
         savePathTop = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', 'Top', 'Top%dStats.csv'%n)
-        columnName = 'S r'
+        columnName = '%s r'%templateType
 
     dfBottom = pd.read_csv(loadPathBottom)
     dataColumn = dfBottom[columnName]
@@ -53,18 +55,25 @@ def statistics(n, metric, templateType, distanceType, templateNumber):
 if __name__ == '__main__':
     startTime = local_clock()
     metrics = ['central', 'gaussian', 'linear', 'logarithmic', 'quadratic', 'unweighted']
-    templateTypes = ['full', 'half', 'S']
+    templateTypes = ['full', 'half', 'S', 'H', 'I', 'LeftFeature', 'RightFeature', 'TopFeature',
+                     'BottomFeature', 'HorizontalMiddleFeature', 'VerticalMiddleFeature']
     distanceTypes = ['fullStimulus', 'borders']
     templateNumbers = ['2', '4', '6', '8', '10', '12', '14', '16', '18', '20']
+    templateNumber = 0
 
 
     for metric in metrics:
         for templateType in templateTypes:
             for distanceType in distanceTypes:
-                for templateNumber in templateNumbers:
+                if templateType in nonPlusTemplates:
                     statistics(10, metric, templateType, distanceType, templateNumber)
                     statistics(100, metric, templateType, distanceType, templateNumber)
                     statistics(1000, metric, templateType, distanceType, templateNumber)
+                else:
+                    for templateNumber in templateNumbers:
+                        statistics(10, metric, templateType, distanceType, templateNumber)
+                        statistics(100, metric, templateType, distanceType, templateNumber)
+                        statistics(1000, metric, templateType, distanceType, templateNumber)
 
     
     print('runtime: %f'%(local_clock() - startTime))

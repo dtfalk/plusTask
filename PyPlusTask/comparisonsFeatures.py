@@ -21,9 +21,9 @@ imageCenter = imageWidth // 2 # assumes a square image
 widths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 # template names for csv file
-templateNames = ['2 r', '4 r', '6 r', '8 r', '10 r', \
-                '12 r', '14 r', '16 r', '18 r', '20 r']
-header = ['stimulusNumber'] + templateNames + ['metric']
+#templateNames = ['2 r', '4 r', '6 r', '8 r', '10 r', \
+#               '12 r', '14 r', '16 r', '18 r', '20 r']
+#header = ['stimulusNumber'] + templateNames + ['metric']
 
 # ===============================================================================
 # ===============================================================================
@@ -59,38 +59,43 @@ def getPaths():
     stimulusArraysPath = os.path.join(curDir, '..', 'stimuli', 'arrays')
     
     # where to find template arrays
-    templateArraysPathFull = os.path.join(curDir, '..', 'templates', 'full', 'arrays')
-    templateArraysPathHalf = os.path.join(curDir, '..', 'templates', 'half','arrays')
-    templateArraysSPath = os.path.join(curDir, '..', 'templates', 'S', 'arrays')
+    #templateArraysPathLeft = os.path.abspath(os.path.join(curDir, '..', 'templates', 'LeftFeature', 'arrays'))
+    #templateArraysPathRight = os.path.abspath(os.path.join(curDir, '..', 'templates', 'RightFeature','arrays'))
+    #templateArraysPathTop= os.path.abspath(os.path.join(curDir, '..', 'templates', 'TopFeature', 'arrays'))
+    #templateArraysPathBottom = os.path.abspath(os.path.join(curDir, '..', 'templates', 'BottomFeature','arrays'))
+    templateArraysPathHorizontalMiddle = os.path.abspath(os.path.join(curDir, '..', 'templates', 'HorizontalMiddleFeature', 'arrays'))
+    templateArraysPathVerticalMiddle = os.path.abspath(os.path.join(curDir, '..', 'templates', 'VerticalMiddleFeature','arrays'))
 
     # paths for storing results
     resultsPath = os.path.abspath(os.path.join(curDir, '..', 'statisticalResults'))
-    #linearPath = os.path.join(resultsPath, '..', 'linear')
-    # quadraticPath = os.path.join(resultsPath, '..', 'quadratic')
+    linearPath = os.path.abspath(os.path.join(resultsPath, 'linear'))
+    quadraticPath = os.path.abspath(os.path.join(resultsPath, 'quadratic'))
     centralPath = os.path.abspath(os.path.join(resultsPath, 'central'))
-    # logPath = os.path.join(resultsPath, '..', 'logarithmic')
-    # gaussianPath = os.path.join(resultsPath, '..', 'gaussian')
+    logPath = os.path.abspath(os.path.join(resultsPath, 'logarithmic'))
+    gaussianPath = os.path.abspath(os.path.join(resultsPath, 'gaussian'))
     unweightedPath = os.path.abspath(os.path.join(resultsPath, 'unweighted'))
     
     # store csv names as a list
-    #resultPathsList = [linearPath, quadraticPath, centralPath, \
-           #logPath, unweightedPath, gaussianPath]
+    resultPathsList = [linearPath, quadraticPath, centralPath, \
+           logPath, unweightedPath, gaussianPath]
     
-    resultPathsList = [centralPath, unweightedPath]
+    #resultPathsList = [centralPath, unweightedPath]
     
     # create folders for each of the statistical weighting conditions
     for path in resultPathsList:
-        if not os.path.exists(path):
+        # directory of the subfolder paths (half and full)
+        subDirectories = [os.path.join(path, 'LeftFeature'), os.path.join(path, 'RightFeature'), 
+                            os.path.join(path, 'TopFeature'), os.path.join(path, 'BottomFeature'), 
+                            os.path.join(path, 'HorizontalMiddleFeature'), os.path.join(path, 'VerticalMiddleFeature')]
 
-            # directory of the subfolder paths (half and full)
-            subDirectories = [os.path.join(path, 'half'), os.path.join(path, 'full'), os.path.join(path, 'S')]
+        # make the overall directory (statistical measure name) and subdirectories
+        os.makedirs(path, exist_ok = True) 
+        for subPath in subDirectories:
+            os.makedirs(subPath, exist_ok = True)
 
-            # make the overall directory (statistical measure name) and subdirectories
-            os.makedirs(path, exist_ok = True) 
-            for subPath in subDirectories:
-                os.makedirs(subPath, exist_ok = True)
-            
-    return stimulusArraysPath, templateArraysPathFull, templateArraysPathHalf, templateArraysSPath, resultPathsList
+    return stimulusArraysPath, templateArraysPathHorizontalMiddle, templateArraysPathVerticalMiddle, resultPathsList       
+    #return stimulusArraysPath, templateArraysPathLeft, templateArraysPathRight, templateArraysPathTop, \
+    #templateArraysPathBottom, templateArraysPathHorizontalMiddle, templateArraysPathVerticalMiddle, resultPathsList
 
 # get one line of results for a given stimulus and metric over all of the templates
 def getLine(stimulusFilename, templates, tempArraysPath, meanDict, metric, weightsMatrices, metricName, widths, stimulus, distanceType):
@@ -250,10 +255,7 @@ def runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, wi
     stims = sorted(os.listdir(stimulusArraysPath), key = extractNumber)
     print('sorted stims and templates: %f'%(local_clock() - strrttime))
 
-    if 'full' in tempArraysPath or 'half' in tempArraysPath:
-        templates = sorted(os.listdir(tempArraysPath), key = extractNumber)
-    else:
-        templates = os.listdir(tempArraysPath)
+    templates = os.listdir(tempArraysPath)
     print('sorted stims and templates: %f'%(local_clock() - strrttime))
 
     # calculate a set of weight and distance matrices
@@ -282,12 +284,8 @@ def runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, wi
     for metric in metricList:
 
         # different save paths for different stimulus types (half crosses vs full crosses)
-        if 'full' in tempArraysPath:
-            savePath = os.path.join(metric, 'full')
-        elif 'half' in tempArraysPath: 
-            savePath = os.path.join(metric, 'half')
-        else:
-            savePath = os.path.join(metric, 'S')
+        savePath = os.path.join(metric, os.path.basename(os.path.dirname(tempArraysPath)))
+        print(savePath)
         
         if distanceType == 'borders': # different csv files for different distance types
             savePath = os.path.join(savePath, 'borders.csv')
@@ -299,10 +297,7 @@ def runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, wi
         
             # setup a writer/header and write the header
             write = writer(f)
-            if 'full' in tempArraysPath or 'half' in tempArraysPath:
-                write.writerow(header)
-            else:
-                write.writerow(['stimulusNumber', 'S r', 'metric'])
+            write.writerow(['stimulusNumber', '%s r' %(os.path.basename(os.path.dirname(tempArraysPath))), 'metric'])
     print('headers written: %f'%(local_clock() - strrttime))
 
 
@@ -354,17 +349,14 @@ def executeTasks(tasks):
             stimulusFilename, templates, tempArraysPath, meanDict, metric, weightsMatrices, metricName, widths, stimulus, distanceType = future_to_task[future]
 
             # different save paths for different stimulus types (half crosses vs full crosses)
-            if 'full' in tempArraysPath:
-                savePath = os.path.join(metric, 'full')
-            elif 'half' in tempArraysPath: 
-                savePath = os.path.join(metric, 'half')
-            else:
-                savePath = os.path.join(metric, 'S')
+
+            savePath = os.path.join(metric, os.path.basename(os.path.dirname(tempArraysPath)))
         
             if distanceType == 'borders': # different csv files for different distance types
                 savePath = os.path.join(savePath, 'borders.csv')
             else:
                 savePath = os.path.join(savePath, 'fullStimulus.csv')
+
             with open(savePath, 'a', newline = '') as f:
                 # setup a writer/header and write the header
                 write = writer(f)
@@ -380,19 +372,14 @@ if __name__ == '__main__':
     startTime = local_clock()
    
     # various save and load paths
-    stimulusArraysPath, templateArraysPathFull, templateArraysPathHalf, templateArraysSPath, metricList = getPaths()
+    stimulusArraysPath, templateArraysPathHorizontalMiddle, templateArraysPathVerticalMiddle, metricList = getPaths()
     
     # list and for loop to let me iterate over the stimuli n times for each of n types of templates
     # because I am lazy and dont want to refactor the code
-    templateList = [templateArraysPathFull, templateArraysPathHalf, templateArraysSPath]
+    templateList = [templateArraysPathHorizontalMiddle, templateArraysPathVerticalMiddle]
 
     for tempArraysPath in templateList:
         for distanceType in distanceTypes:
-            # if distanceType == 'fullStimulus' and \
-            #     not ('full' in tempArraysPath):
-            #     print(tempArraysPath)
-            #     print(distanceType)
-            #     continue
             iterationStart = local_clock()
             runInstance(stimulusArraysPath, tempArraysPath, distanceType, metricList, widths)
             print('Iteration Runtime: %f'%(local_clock() - iterationStart))

@@ -4,7 +4,7 @@ from PIL import Image
 
 if __name__ == '__main__':
     curDir = os.path.dirname(__file__)
-    imagePath = os.path.join(curDir, 'tempS.png')
-    image = Image.open(imagePath)
-    array = np.array(image)
-    print(array.shape)
+    arrayPath = os.path.abspath(os.path.join(curDir, '..', 'templates', 'I', 'arrays', 'I.npy'))
+    array = np.load(arrayPath) * 255
+    image = Image.fromarray(array.astype(np.uint8), 'L')
+    image.save(os.path.join(os.path.dirname(__file__), 'I.png'))

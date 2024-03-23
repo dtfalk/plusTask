@@ -5,13 +5,16 @@ from PIL import Image
 from pylsl import local_clock
 from createImages import imageWidth, imageHeight
 
+nonPlusTemplates = ['S', 'H', 'I', 'LeftFeature', 'RightFeature', 'TopFeature',
+                     'BottomFeature', 'HorizontalMiddleFeature', 'VerticalMiddleFeature']
+
 def compose(n, metric, templateType, distanceType, templateNumber):
     curDir = os.path.dirname(__file__)
     
     # read the relevant CSV file and collect all of the stimuli numbers
     topNStimuliNumbers = []
     bottomNStimuliNumbers = []
-    if templateType == 'full' or templateType == 'half':
+    if not templateType in nonPlusTemplates:
         topNLoadPath = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Top', 'Top%d.csv'%n)
         bottomNLoadPath = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'CSVs', templateNumber, 'Bottom', 'Bottom%d.csv'%n)
     else:
@@ -61,7 +64,7 @@ def compose(n, metric, templateType, distanceType, templateNumber):
     compositeArrayBottomN = (compositeArrayBottomN / n) * 255
     
     # save composite arrays to relevant folders
-    if templateType == 'full' or templateType == 'half':
+    if not templateType in nonPlusTemplates:
         compositeArraySavePathTopN = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'arrays', templateNumber, 'Top', 'Composite%d.npy'%n)
         compositeArraySavePathBottomN = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'arrays', templateNumber, 'Bottom', 'Composite%d.npy'%n)
     else:
@@ -74,7 +77,7 @@ def compose(n, metric, templateType, distanceType, templateNumber):
     np.save(compositeArraySavePathTopN, compositeArrayTopN)
 
     # save composite images to relevant folders
-    if templateType == 'full' or templateType == 'half':
+    if not templateType in nonPlusTemplates:
         compositeImageSavePathTopN = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'images', templateNumber, 'Top', 'Composite%d.png'%n)
         compositeImageSavePathBottomN = os.path.join(curDir, '..', 'topStimuli', metric, templateType, distanceType, 'images', templateNumber, 'Bottom', 'Composite%d.png'%n)
     else:
@@ -95,17 +98,24 @@ def compose(n, metric, templateType, distanceType, templateNumber):
 if __name__ == '__main__':
     startTime = local_clock()
     metrics = ['central', 'gaussian', 'linear', 'logarithmic', 'quadratic', 'unweighted']
-    templateTypes = ['full', 'half', 'S']
+    templateTypes = ['full', 'half', 'S', 'H', 'I', 'LeftFeature', 'RightFeature', 'TopFeature',
+                     'BottomFeature', 'HorizontalMiddleFeature', 'VerticalMiddleFeature']
     distanceTypes = ['fullStimulus', 'borders']
     templateNumbers = ['2', '4', '6', '8', '10', '12', '14', '16', '18', '20']
+    templateNumber = 0
 
 
     for metric in metrics:
         for templateType in templateTypes:
             for distanceType in distanceTypes:
-                for templateNumber in templateNumbers:
+                if templateType in nonPlusTemplates:
                     compose(10, metric, templateType, distanceType, templateNumber)
                     compose(100, metric, templateType, distanceType, templateNumber)
                     compose(1000, metric, templateType, distanceType, templateNumber)
+                else:
+                    for templateNumber in templateNumbers:
+                        compose(10, metric, templateType, distanceType, templateNumber)
+                        compose(100, metric, templateType, distanceType, templateNumber)
+                        compose(1000, metric, templateType, distanceType, templateNumber)
     
     print('runtime: %f'%(local_clock() - startTime))

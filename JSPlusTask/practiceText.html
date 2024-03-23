@@ -58,11 +58,14 @@
 
     // generates the text the user will see
     function generatePromptHTML() {
+      experimentType = sessionStorage.getItem('experimentType');
+      if (experimentType == 'noTarget') {
         return `
             <br>
-            <p> You will be shown a series of images. In some of these images there is a hidden "S" in the middle of the image on the screen.</p> 
-            <p> Please press "Y" if you believe that you see an S hidden in the middle of the image. </p>
-            <p> Please press "N" if you do not believe that you see a S hidden in the middle of the image.</p>
+            <p> You will now be given a chance to practice.</p>
+                <p> Remember to press "Y" if you believe that you see a hidden "S" </p>
+                <p> Remember to press "N" if you do not believe that you see a hidden "S".</p>
+                <p> Press the spacebar to continue.</p>
             <br>
             <p> Click the "Continue" button to proceed.</p>
 
@@ -77,27 +80,41 @@
             <br>
             <br>
             `;
+          } else {
+            return `
+            <br>
+            <p> You will now be given a chance to practice.</p>
+                <p> Remember to press "Y" if you believe that you see a hidden "S". </p>
+                <p> Remember to press "N" if you do not believe that you see a hidden "S".</p>
+                <p> After clicking the "Continue" button you will be shown a picture of the "S" that is hidden in some of the images.</p>
+            <br>
+            <p> Click the "Continue" button to proceed.</p>
+
+            <!-- Submit button -->
+            <center>
+                <text id = 'errorMessage'> </text>
+            </center>
+            <br>
+            <center>
+                <button onclick="submitForm()">Continue</button>
+            </center>
+            <br>
+            <br>
+            `
+          }
     }
   
 
       // check if user gave response, proceed to instructions if so
       function submitForm() {
-        sessionStorage.setItem('practiceTextShown', false);
-        sessionStorage.setItem('practiceTrialsCompleted', false);
-        sessionStorage.setItem('realTrialsCompleted', false);
-        
-        const params = new URLSearchParams(window.location.search);
-        const participantId = params.get('PROLIFIC_PID');
-        sessionStorage.setItem('participantId', String(participantId)) // store prolific ID
-
-        const experimentVersionNum = Math.round(Math.random()); // 0 for no target image, 1 for target image
-
-        if (experimentVersionNum == 0) {
-            sessionStorage.setItem('experimentType', 'noTarget')
+        sessionStorage.setItem('practiceTextShown', true);
+        experimentType = sessionStorage.getItem('experimentType');
+        if (experimentType == 'noTarget') {
+            window.location.href = 'practiceTrials.html';
         } else {
-            sessionStorage.setItem('experimentType', 'Target')
+            window.location.href = 'templateImage.html';
+
         }
-        window.location.href = 'practiceText.html';
       }
 
 

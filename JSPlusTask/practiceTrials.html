@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .image-container {
+            font-family: 'Times New Roman', Times, serif;
+            width: 50%; /* or any width you prefer */
+            border: 1px solid #000;  /* optional: for styling */
+            padding-top: 50%;
+            margin: auto;
+            position: relative; /* for positioning the video element */
+            box-sizing: border-box;
+        }
+        img {
+            top: 0;
+            left: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            justify-content: center;
+            align-items: center;
+            display: block;
+            font-family: 'Arial', sans-serif;
+            background-color:#800000;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        main {
+            font-family: 'Times New Roman', Times, serif;
+            display: block;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-family: 'Times New Roman', Times, serif;
+            display: block;
+            color: #3498db;
+        }
+        p {
+            font-family: 'Times New Roman', Times, serif;
+            display: block;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+        }
+        text {
+            font-family: 'Times New Roman', Times, serif;
+            display: none;
+            font-size: 16px;
+            line-height: 1.6;
+            color:red
+        }
+    </style>
+</head>
+<body>
+
+<main id="instructionsSection" onload = initialize()>
+    <div class="image-container">
+        <img id='STemplate' ></img>
+    </div>
+    <br>
+</main>
+
+<script>
+    function submitForm() {
+        let practiceTextShown = sessionStorage.getItem('practiceTextShown');
+        if (practiceTextShown) {
+            window.location.href = 'realTrials.html';
+        } else{
+            window.location.href = 'practiceTrials.html';
+        }
+    }
+
+</script>
+
+</body>
+</html>
